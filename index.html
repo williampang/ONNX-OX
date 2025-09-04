@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>O/X 手写识别 (ONNX Runtime Web)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+  <link rel="stylesheet" href="web/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>O / X 手写识别</h1>
+    <div class="board">
+      <canvas id="canvas" width="280" height="280"></canvas>
+      <div class="controls">
+        <button id="clearBtn">清空</button>
+        <button id="predictBtn">识别</button>
+        <button id="saveOBtn">保存样本 O</button>
+        <button id="saveXBtn">保存样本 X</button>
+      </div>
+      <div class="result">
+        <div>预测结果：<span id="pred">-</span></div>
+        <div>置信度：<span id="conf">-</span></div>
+        <div class="hint">将导出的模型放在 model/model.onnx</div>
+        <div id="status"></div>
+      </div>
+    </div>
+  </div>
+  <script src="web/script.js"></script>
+</body>
+</html>

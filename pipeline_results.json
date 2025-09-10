@@ -1,0 +1,26 @@
+{
+  "pipeline_info": {
+    "timestamp": "2025-09-10 05:28:52",
+    "dataset_dir": "dataset",
+    "model_path": "model/model.onnx",
+    "epochs": 5,
+    "batch_size": 128,
+    "learning_rate": 0.001
+  },
+  "dataset_stats": {
+    "train_O_samples": 500,
+    "train_X_samples": 500,
+    "val_O_samples": 100,
+    "val_X_samples": 100,
+    "total_samples": 1200
+  },
+  "model_info": {
+    "path": "model/model.onnx",
+    "size_bytes": 226863,
+    "size_mb": 0.22
+  },
+  "files_generated": [
+    "dataset",
+    "model/model.onnx"
+  ]
+}

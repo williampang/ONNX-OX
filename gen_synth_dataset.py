@@ -58,8 +58,7 @@ def draw_X(img_size: int) -> Image.Image:
     return canvas
 
 def normalize_and_post(img: Image.Image) -> Image.Image:
-    # Slight blur via resize trick and clamp
-    img = img.filter(Image.Image.filter if hasattr(Image.Image, "filter") else lambda x: x)
+    # Apply autocontrast and noise
     img = ImageOps.autocontrast(img, cutoff=1)
     img = add_noise(img, amount=random.uniform(0.0, 0.01))
     return img

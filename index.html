@@ -5,7 +5,7 @@
   <title>O/X 手写识别 (ONNX Runtime Web)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
-  <link rel="stylesheet" href="web/style.css" />
+  <link rel="stylesheet" href="web_style.css" />
 </head>
 <body>
   <div class="container">
@@ -21,11 +21,11 @@
       <div class="result">
         <div>预测结果：<span id="pred">-</span></div>
         <div>置信度：<span id="conf">-</span></div>
-        <div class="hint">将导出的模型放在 model/model.onnx</div>
+        <div class="hint">模型已生成在 model/model.onnx</div>
         <div id="status"></div>
       </div>
     </div>
   </div>
-  <script src="web/script.js"></script>
+  <script src="web_script.js"></script>
 </body>
 </html>

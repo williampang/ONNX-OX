@@ -57,6 +57,46 @@ def draw_X(img_size: int) -> Image.Image:
     canvas = canvas.rotate(angle, resample=Image.BILINEAR, fillcolor=0)
     return canvas
 
+def draw_checkmark(img_size: int) -> Image.Image:
+    canvas = Image.new("L", (img_size, img_size), color=0)  # black bg
+    draw = ImageDraw.Draw(canvas)
+    margin = random.randint(2, 6)
+    thickness = random.randint(2, 5)
+    
+    # Checkmark is made of two lines forming a "√" shape
+    # First line: from left-middle to bottom-middle (down and right)
+    # Second line: from bottom-middle to top-right (up and right)
+    
+    # Calculate checkmark points with some variation
+    left_x = margin + random.randint(0, 2)
+    left_y = img_size // 2 + random.randint(-3, 3)
+    
+    bottom_x = img_size // 2 + random.randint(-2, 2)
+    bottom_y = img_size - margin - random.randint(0, 3)
+    
+    right_x = img_size - margin - random.randint(0, 2)
+    right_y = margin + random.randint(0, 3)
+    
+    # Draw the checkmark with thickness
+    for t in range(thickness):
+        # First stroke: down and right
+        draw.line(
+            (left_x - t, left_y, bottom_x, bottom_y + t),
+            fill=255,
+            width=1,
+        )
+        # Second stroke: up and right
+        draw.line(
+            (bottom_x, bottom_y - t, right_x + t, right_y),
+            fill=255,
+            width=1,
+        )
+    
+    # Apply rotation
+    angle = random.uniform(-15, 15)
+    canvas = canvas.rotate(angle, resample=Image.BILINEAR, fillcolor=0)
+    return canvas
+
 def normalize_and_post(img: Image.Image) -> Image.Image:
     # Apply autocontrast and noise
     img = ImageOps.autocontrast(img, cutoff=1)
@@ -67,8 +107,10 @@ def save_samples(out_dir: Path, cls_name: str, count: int, img_size: int):
     for i in range(count):
         if cls_name == "O":
             img = draw_O(img_size)
-        else:
+        elif cls_name == "X":
             img = draw_X(img_size)
+        else:  # checkmark
+            img = draw_checkmark(img_size)
         img = normalize_and_post(img)
         (out_dir / cls_name).mkdir(parents=True, exist_ok=True)
         img.save(out_dir / cls_name / f"{i:06d}.png")
@@ -84,16 +126,20 @@ def main():
     out = Path(args.out)
     ensure_dir(out / "train" / "O")
     ensure_dir(out / "train" / "X")
+    ensure_dir(out / "train" / "checkmark")
     ensure_dir(out / "val" / "O")
     ensure_dir(out / "val" / "X")
+    ensure_dir(out / "val" / "checkmark")
 
     print("Generating training set...")
-    save_samples(out / "train", "O", args.train // 2, args.img_size)
-    save_samples(out / "train", "X", args.train // 2, args.img_size)
+    save_samples(out / "train", "O", args.train // 3, args.img_size)
+    save_samples(out / "train", "X", args.train // 3, args.img_size)
+    save_samples(out / "train", "checkmark", args.train // 3, args.img_size)
 
     print("Generating validation set...")
-    save_samples(out / "val", "O", args.val // 2, args.img_size)
-    save_samples(out / "val", "X", args.val // 2, args.img_size)
+    save_samples(out / "val", "O", args.val // 3, args.img_size)
+    save_samples(out / "val", "X", args.val // 3, args.img_size)
+    save_samples(out / "val", "checkmark", args.val // 3, args.img_size)
 
     print("Done.")
 

@@ -63,6 +63,7 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 
 document.getElementById('saveOBtn').addEventListener('click', () => saveSample('O'));
 document.getElementById('saveXBtn').addEventListener('click', () => saveSample('X'));
+document.getElementById('saveCheckBtn').addEventListener('click', () => saveSample('checkmark'));
 
 function saveSample(label) {
   const link = document.createElement('a');
@@ -99,15 +100,37 @@ async function predict() {
     statusEl.textContent = '推理中...';
     const outputs = await session.run({ input: tensor });
     const logits = outputs.output.data;
-    // softmax
-    const maxLogit = Math.max(logits[0], logits[1]);
-    const exps = [Math.exp(logits[0] - maxLogit), Math.exp(logits[1] - maxLogit)];
-    const sum = exps[0] + exps[1];
-    const probs = [exps[0] / sum, exps[1] / sum];
-    const labels = ['O', 'X'];
-    let predIdx = probs[0] >= probs[1] ? 0 : 1;
-    document.getElementById('pred').textContent = labels[predIdx];
-    document.getElementById('conf').textContent = (probs[predIdx] * 100).toFixed(2) + '%';
+    
+    // softmax for 3 classes
+    const maxLogit = Math.max(logits[0], logits[1], logits[2]);
+    const exps = [
+      Math.exp(logits[0] - maxLogit), 
+      Math.exp(logits[1] - maxLogit), 
+      Math.exp(logits[2] - maxLogit)
+    ];
+    const sum = exps[0] + exps[1] + exps[2];
+    const probs = [exps[0] / sum, exps[1] / sum, exps[2] / sum];
+    
+    const labels = ['圈', '叉', '勾'];
+    let predIdx = 0;
+    for (let i = 1; i < probs.length; i++) {
+      if (probs[i] > probs[predIdx]) {
+        predIdx = i;
+      }
+    }
+    
+    // Uncertainty threshold - show ? if confidence is too low
+    const CONFIDENCE_THRESHOLD = 0.6;
+    const maxProb = probs[predIdx];
+    
+    if (maxProb < CONFIDENCE_THRESHOLD) {
+      document.getElementById('pred').textContent = '?';
+      document.getElementById('conf').textContent = (maxProb * 100).toFixed(2) + '% (不确定)';
+    } else {
+      document.getElementById('pred').textContent = labels[predIdx];
+      document.getElementById('conf').textContent = (maxProb * 100).toFixed(2) + '%';
+    }
+    
     statusEl.textContent = '完成';
   } catch (e) {
     console.error(e);

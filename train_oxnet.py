@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
 class PNGFolder(Dataset):
-    def __init__(self, root, classes=("O", "X")):
+    def __init__(self, root, classes=("O", "X", "checkmark")):
         self.samples = []
         self.class_to_idx = {c: i for i, c in enumerate(classes)}
         for c in classes:
@@ -45,7 +45,7 @@ class OXNet(nn.Module):
             nn.Linear(32 * 5 * 5, 64),
             nn.ReLU(inplace=True),
             nn.Dropout(0.2),
-            nn.Linear(64, 2),
+            nn.Linear(64, 3),  # 3 classes: O, X, checkmark
         )
 
     def forward(self, x):

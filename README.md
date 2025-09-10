@@ -1,9 +1,10 @@
-# O / X 手写识别（浏览器本地 ONNX Runtime Web 推理）
+# 手写符号识别（浏览器本地 ONNX Runtime Web 推理）
 
 本项目提供：
 - 训练脚本（PyTorch）并导出 ONNX（opset 13）
 - 浏览器端前端（Canvas 采集 + 预处理 + onnxruntime-web 推理）
 - 合成数据集生成脚本（无需手收集样本也能快速得到可用模型）
+- 支持识别三种符号：圈（O）、叉（X）、勾（√），不确定时显示问号（?）
 
 ## 快速开始
 
@@ -28,9 +29,11 @@ dataset/
   train/
     O/*.png
     X/*.png
+    checkmark/*.png
   val/
     O/*.png
     X/*.png
+    checkmark/*.png
 ```
 
 4) 本地训练并导出 ONNX 模型
@@ -64,7 +67,8 @@ npx serve .
 ## 模型约定
 
 - Input: name = "input", shape = [1,1,28,28], dtype = float32
-- Output: name = "output", shape = [1,2]（logits），类别顺序为 ["O","X"]
+- Output: name = "output", shape = [1,3]（logits），类别顺序为 ["圈","叉","勾"]
+- 不确定阈值：置信度低于60%时显示问号（?）
 
 ## 兼容性与常见问题
 

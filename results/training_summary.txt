@@ -1,0 +1,24 @@
+
+ONNX-OX Training Results Summary
+===============================
+
+Dataset Information:
+- Training samples: 30000
+- Validation samples: 6000
+- Classes: Circle (圈), Cross (叉), Checkmark (勾)
+
+Training Configuration:
+- Epochs: 8
+- Batch size: 128
+- Learning rate: 0.001
+- Device: cpu
+
+Final Results:
+- Best validation accuracy: 1.0000 (100.00%)
+- Final training accuracy: 0.9998 (99.98%)
+- Final validation accuracy: 1.0000 (100.00%)
+- Training time: 76.74 seconds
+
+Model Output:
+- ONNX model saved to: model/model.onnx
+- Results saved to: results

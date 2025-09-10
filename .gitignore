@@ -27,11 +27,12 @@ venv/
 ENV/
 env/
 
-# Generated dataset
+# Generated dataset (large files)
 dataset/
 
-# Model files
-model/
+# Test files
+test_dataset/
+test_results/
 
 # Temporary files
 *.tmp

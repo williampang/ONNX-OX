@@ -70,7 +70,24 @@ npx serve .
 
 - 本项目使用 onnxruntime-web（WASM 后端），默认纯 CPU，无需 GPU/WebGL。
 - 若推理报 shape 或 name 不匹配，请确认训练导出的 input_names/output_names 与前端一致（input/output）。
-- 离线环境请将 `https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js` 下载到本地并用相对路径引用。
+
+### ort.min.js 下载地址与离线配置
+
+如果遇到 `ort.min.js` 加载失败，请按以下步骤配置离线版本：
+
+**下载地址：**
+- 主要地址：https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js
+- 备用地址：https://unpkg.com/onnxruntime-web/dist/ort.min.js
+- 备用地址：https://npmcdn.com/onnxruntime-web/dist/ort.min.js
+
+**配置步骤：**
+1. 从上述任意地址下载 `ort.min.js` 文件
+2. 将下载的文件放入项目的 `web/ort.min.js` 位置（替换现有的占位符文件）
+3. 本项目已配置为使用本地版本，无需修改 HTML 文件
+4. 重新加载页面即可正常使用
+
+**版本检查：**
+- 最新版本信息：https://www.npmjs.com/package/onnxruntime-web
 
 ## License
 

@@ -1,0 +1,9 @@
+dataset
+dataset/*
+!.gitkeep
+logs/*
+.venv
+.venv/*
+venv
+venv/*
+__pycache__

@@ -1,6 +1,10 @@
 /* global ort */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const CLASSES = ['O', 'V', 'X'];
+const MODEL_CANDIDATES = ['model/model_v4_handwritten.onnx', 'model/model.onnx'];
+let sessionPromise = null;
+let activeModelPath = null;
 
 // Set black background and white stroke, to match training data
 ctx.fillStyle = 'black';
@@ -59,9 +63,11 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   ctx.fillStyle = 'white';
   document.getElementById('pred').textContent = '-';
   document.getElementById('conf').textContent = '-';
+  renderProbabilities(null);
 });
 
 document.getElementById('saveOBtn').addEventListener('click', () => saveSample('O'));
+document.getElementById('saveVBtn').addEventListener('click', () => saveSample('V'));
 document.getElementById('saveXBtn').addEventListener('click', () => saveSample('X'));
 
 function saveSample(label) {
@@ -90,29 +96,73 @@ function preprocessTo28x28() {
 async function predict() {
   const statusEl = document.getElementById('status');
   try {
-    statusEl.textContent = '加载模型中...';
-    const session = await ort.InferenceSession.create('model/model.onnx', {
-      executionProviders: ['wasm']
-    });
+    const session = await getSession(statusEl);
     const inputData = preprocessTo28x28();
     const tensor = new ort.Tensor('float32', inputData, [1, 1, 28, 28]);
     statusEl.textContent = '推理中...';
     const outputs = await session.run({ input: tensor });
-    const logits = outputs.output.data;
-    // softmax
-    const maxLogit = Math.max(logits[0], logits[1]);
-    const exps = [Math.exp(logits[0] - maxLogit), Math.exp(logits[1] - maxLogit)];
-    const sum = exps[0] + exps[1];
-    const probs = [exps[0] / sum, exps[1] / sum];
-    const labels = ['O', 'X'];
-    let predIdx = probs[0] >= probs[1] ? 0 : 1;
-    document.getElementById('pred').textContent = labels[predIdx];
+    const logits = Array.from(outputs.output.data);
+    if (logits.length !== CLASSES.length) {
+      throw new Error(`模型输出维度 ${logits.length} 与预期 ${CLASSES.length} 不符`);
+    }
+    const probs = softmax(logits);
+    const predIdx = probs.indexOf(Math.max(...probs));
+    document.getElementById('pred').textContent = CLASSES[predIdx];
     document.getElementById('conf').textContent = (probs[predIdx] * 100).toFixed(2) + '%';
-    statusEl.textContent = '完成';
+    renderProbabilities(probs);
+    statusEl.textContent = `完成：${activeModelPath || '未知模型'}`;
   } catch (e) {
     console.error(e);
-    statusEl.textContent = '模型加载或推理失败。请确保 model/model.onnx 存在。';
+    sessionPromise = null;
+    statusEl.textContent = '模型加载或推理失败，请检查模型文件路径。';
   }
 }
 
 document.getElementById('predictBtn').addEventListener('click', predict);
+
+async function getSession(statusEl) {
+  if (sessionPromise) return sessionPromise;
+  sessionPromise = (async () => {
+    let lastError = null;
+    for (const path of MODEL_CANDIDATES) {
+      try {
+        statusEl.textContent = `加载模型：${path}`;
+        const session = await ort.InferenceSession.create(path, {
+          executionProviders: ['wasm']
+        });
+        activeModelPath = path;
+        return session;
+      } catch (err) {
+        console.warn(`无法加载 ${path}`, err);
+        lastError = err;
+      }
+    }
+    throw lastError || new Error('未找到可用的模型文件');
+  })();
+  return sessionPromise;
+}
+
+function softmax(logits) {
+  const maxLogit = Math.max(...logits);
+  const exps = logits.map((v) => Math.exp(v - maxLogit));
+  const sum = exps.reduce((a, b) => a + b, 0);
+  return exps.map((v) => v / sum);
+}
+
+function renderProbabilities(probs) {
+  const tbody = document.getElementById('probBody');
+  tbody.innerHTML = '';
+  if (!probs) return;
+  const maxIdx = probs.indexOf(Math.max(...probs));
+  probs.forEach((p, idx) => {
+    const tr = document.createElement('tr');
+    if (idx === maxIdx) tr.classList.add('highlight');
+    const tdLabel = document.createElement('td');
+    tdLabel.textContent = CLASSES[idx];
+    const tdProb = document.createElement('td');
+    tdProb.textContent = (p * 100).toFixed(2) + '%';
+    tr.appendChild(tdLabel);
+    tr.appendChild(tdProb);
+    tbody.appendChild(tr);
+  });
+}
